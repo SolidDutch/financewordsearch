@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Word Search Puzzle</title>
+    
+    <!-- Link to Google Fonts for "Syne" -->
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Syne', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #001246;
+            color: #FE4600;
+        }
+        h1 {
+            color: #FE4600;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        #container {
+            display: flex;
+            max-width: 800px;
+            gap: 20px;
+        }
+        #word-list {
+            max-width: 200px;
+            padding: 15px;
+            background-color: #FE4600;
+            color: #FFFFFF;
+            list-style-type: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .word {
+            font-size: 16px;
+            color: #FFFFFF;
+            margin: 4px 0;
+            transition: color 0.3s, text-decoration 0.3s;
+        }
+        .word.found {
+            text-decoration: line-through;
+            color: #07A0C3;
+        }
+        #word-search {
+            display: grid;
+            grid-template-columns: repeat(15, 30px);
+            gap: 3px;
+            padding: 10px;
+            background-color: #07A0C3;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: #FE4600;
+            color: #FFFFFF;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            user-select: none;
+        }
+        .highlighted {
+            background-color: #07A0C3;
+            color: #001246;
+        }
+        .found {
+            background-color: #001246 !important;
+            color: #FFFFFF !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>Finance Word Search Puzzle</h1>
+    <div id="container">
+        <ul id="word-list">
+            <li class="word">BUDGET</li>
+            <li class="word">CAPITAL</li>
+            <li class="word">CURRENCY</li>
+            <li class="word">DIVIDEND</li>
+            <li class="word">EQUITY</li>
+            <li class="word">FINANCE</li>
+            <li class="word">FOREX</li>
+            <li class="word">FUND</li>
+            <li class="word">INVEST</li>
+            <li class="word">LIABILITY</li>
+            <li class="word">LOAN</li>
+            <li class="word">MARKET</li>
+            <li class="word">PORTFOLIO</li>
+            <li class="word">PROFIT</li>
+            <li class="word">RATE</li>
+            <li class="word">REVENUE</li>
+            <li class="word">STOCK</li>
+            <li class="word">TAX</li>
+            <li class="word">VALUE</li>
+            <li class="word">YIELD</li>
+        </ul>
+        
+        <div id="word-search"></div>
+    </div>
+
+    <script>
+        const words = [
+            "BUDGET", "CAPITAL", "CURRENCY", "DIVIDEND", "EQUITY", "FINANCE",
+            "FOREX", "FUND", "INVEST", "LIABILITY", "LOAN", "MARKET", "PORTFOLIO",
+            "PROFIT", "RATE", "REVENUE", "STOCK", "TAX", "VALUE", "YIELD"
+        ];
+        
+        const gridSize = 15;
+        const grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+        const wordSearchContainer = document.getElementById('word-search');
+        const wordListItems = document.querySelectorAll('.word');
+
+        // Utility function to place word in grid
+        function placeWord(word) {
+            const directions = [[1, 0], [0, 1], [1, 1], [-1, 1]]; // right, down, diagonal-right, diagonal-left
+            let placed = false;
+
+            while (!placed) {
+                const direction = directions[Math.floor(Math.random() * directions.length)];
+                const startX = Math.floor(Math.random() * gridSize);
+                const startY = Math.floor(Math.random() * gridSize);
+                let x = startX, y = startY, canPlace = true;
+
+                for (let i = 0; i < word.length; i++) {
+                    if (x < 0 || x >= gridSize || y < 0 || y >= gridSize || (grid[y][x] && grid[y][x] !== word[i])) {
+                        canPlace = false;
+                        break;
+                    }
+                    x += direction[0];
+                    y += direction[1];
+                }
+
+                if (canPlace) {
+                    x = startX;
+                    y = startY;
+                    for (let i = 0; i < word.length; i++) {
+                        grid[y][x] = word[i];
+                        x += direction[0];
+                        y += direction[1];
+                    }
+                    placed = true;
+                }
+            }
+        }
+
+        // Place all words
+        words.forEach(word => placeWord(word));
+
+        // Fill empty cells with random letters
+        for (let row = 0; row < gridSize; row++) {
+            for (let col = 0; col < gridSize; col++) {
+                if (!grid[row][col]) {
+                    grid[row][col] = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // random A-Z
+                }
+            }
+        }
+
+        // Render the grid
+        grid.forEach(row => {
+            row.forEach(letter => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.textContent = letter;
+                wordSearchContainer.appendChild(cell);
+            });
+        });
+
+        let selectedCells = [];
+        let selecting = false;
+
+        wordSearchContainer.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('cell')) {
+                selecting = true;
+                selectedCells.push(e.target);
+                e.target.classList.add('highlighted');
+            }
+        });
+
+        wordSearchContainer.addEventListener('mouseover', (e) => {
+            if (selecting && e.target.classList.contains('cell') && !selectedCells.includes(e.target)) {
+                selectedCells.push(e.target);
+                e.target.classList.add('highlighted');
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (selecting) {
+                selecting = false;
+                const selectedWord = selectedCells.map(cell => cell.textContent).join('');
+                
+                if (words.includes(selectedWord)) {
+                    selectedCells.forEach(cell => cell.classList.add('found'));
+                    wordListItems.forEach(word => {
+                        if (word.textContent === selectedWord) {
+                            word.classList.add('found');
+                        }
+                    });
+                } else {
+                    selectedCells.forEach(cell => cell.classList.remove('highlighted'));
+                }
+                
+                selectedCells = [];
+            }
+        });
+    </script>
+</body>
+</html>
